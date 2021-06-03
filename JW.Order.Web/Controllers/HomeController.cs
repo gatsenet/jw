@@ -165,7 +165,7 @@ namespace JW.Order.Web.Controllers {
         public ActionResult SettingUpdate(string SettingID,string UserData)
         {
             bool isok = false; string msg = "";
-            isok = DB.BasicSetting.UpdateSetting(UserData, out msg);
+            isok = DB.BasicSetting.UpdateSetting(SettingID,UserData, out msg);
             Response.StatusCode = isok ? 200 : 500;
             if (!isok)
             {

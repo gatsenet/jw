@@ -35,9 +35,9 @@ namespace JW.DB
             return isok;
         }
 
-        public static bool UpdateSetting(string datajson,out string msg)
+        public static bool UpdateSetting(string SettingID,string datajson,out string msg)
         {
-            return SettingInfo("", 2, datajson, out msg);
+            return SettingInfo(SettingID, 2, datajson, out msg);
         }
     }
 }
