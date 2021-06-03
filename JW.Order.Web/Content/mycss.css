@@ -1,0 +1,28 @@
+﻿.settings {
+    text-align: center;
+    background-color: rgba(191, 191, 191, 0.15);
+}
+
+    .settings .column {
+        width: 26%;
+        display: inline-block;
+        margin: 15px 3%;
+        text-align: left;
+    }
+
+        .settings .column .field {
+            padding: 5px 0;
+        }
+
+            .settings .column .field > div {
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            .settings .column .field .label {
+                width: 75px;
+            }
+
+            .settings .column .field .value {
+                width: 60%;
+            }

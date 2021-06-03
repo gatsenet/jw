@@ -1,0 +1,103 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "公共设置";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items =>
+    {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+        //items.Add()
+        //    .Widget(w => w
+        //        .Button()
+        //        .Icon("save")
+        //        .Text("保存")
+        //        .OnClick("saveButton_click")
+        //        .Disabled(!Model.InSave)
+        //)
+        //.LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        //.Location(ToolbarItemLocation.After);
+    })
+)
+<br />
+@(Html.DevExtreme().DataGrid()
+        .ID("targetDataGrid")
+        .Paging(paging => paging.Enabled(false))
+        .ShowBorders(true)
+        .Editing(editing => {
+            editing.Mode(GridEditMode.Batch);
+            editing.AllowUpdating(Model.InSave);
+            editing.SelectTextOnEditStart(true);
+            editing.StartEditAction(GridStartEditAction.Click);
+        })
+        .ColumnAutoWidth(true)
+        .Columns(columns => {
+            columns.Add().DataField("SettingID").Visible(false).AllowEditing(false);
+            columns.Add().DataField("SettingName").Caption("名称").AllowEditing(false);
+            columns.Add().DataField("SettingValue").Caption("值");
+        })
+    )
+
+<script>
+    function getDataGrid() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            key: "SettingID",
+            load: function (loadOptions) {
+                var result = [];
+                return $.getJSON("/Home/SettingList");
+            },            
+            update: function (key, values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Home/SettingUpdate",
+                    method: "POST",
+                    data: { SettingID: key, UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+                //return $.ajax({
+                //    url: "/account/UpdateUser",
+                //    method: "POST",
+                //    data: { UserID: key, UserData: jsonToString(values) }
+                //})
+            },
+            
+            
+            //store:store
+        });
+        var grid = getDataGrid();
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[0].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+</script>

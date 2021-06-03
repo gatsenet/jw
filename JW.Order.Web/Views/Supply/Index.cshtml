@@ -1,0 +1,173 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "供应商";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items => {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("plus")
+            .Text("新增")
+            .OnClick("addButton_click")
+            .Disabled(!Model.InAdd)
+    )
+    .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+
+    })
+)
+<br />
+@(Html.DevExtreme().DataGrid().ShowBorders(true)
+        //.OnRowUpdating("onRowUpdating")
+        .OnEditorPreparing("onEditorPreparing")
+        .Columns(col=> {
+            col.Add().DataField("SupplyID").Caption("编码").ValidationRules(v => v.AddRequired().Message("必填"));//ValidationRules(v => v.AddAsync().ValidationCallback("validationCallback"))
+            col.Add().DataField("SupplyName").Caption("名称").ValidationRules(v => v.AddRequired().Message("必填"));
+            col.Add().DataField("SupplyFullName").Caption("全称");            
+            col.Add().DataField("IsStop").DataType(GridColumnDataType.Boolean).Caption("停用");
+        })
+        .Selection(s => s.Mode(SelectionMode.Single))
+        .ID("targetDataGrid")
+        .Paging(p => p.PageSize(10))
+        .ColumnAutoWidth(true)
+        .Editing(e => e.Mode(GridEditMode.Popup)
+            .AllowUpdating(Model.InSave)
+            //.AllowAdding(true)
+            .AllowDeleting(Model.InDel)
+            .Texts(t=>t.AddRow("新增").DeleteRow("删除").EditRow("修改").CancelRowChanges("取消").SaveRowChanges("保存").ConfirmDeleteMessage("确定删除当前记录?"))
+            .Popup(p => p
+                .Title("供应商信息")
+                .ShowTitle(true)
+                .Width(700)
+                .Height(525)
+            )
+            .Form(f => f.Items(items =>
+            {
+                items.AddGroup()
+                    .ColCount(2)
+                    .ColSpan(2)
+                    .Items(groupItems =>
+                    {
+                        groupItems.AddSimple().DataField("SupplyID");
+                        groupItems.AddSimple().DataField("SupplyName");
+                        groupItems.AddSimple().DataField("SupplyFullName");
+                        groupItems.AddSimple().DataField("IsStop");
+                    });
+            }))
+         )
+    )
+
+<script>
+    function getDataGrid() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            key: "SupplyID",
+            load: function (loadOptions) {
+                var result = [];
+                return $.getJSON("/Supply/SupplyList");
+            },
+            insert: function (values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Supply/SupplyAdd",
+                    method: "POST",
+                    data: { UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            },
+            update: function (key, values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Supply/SupplyUpdate",
+                    method: "POST",
+                    data: { SupplyID: key, UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText ));
+                    });
+                return deferred.promise();
+                //return $.ajax({
+                //    url: "/account/UpdateUser",
+                //    method: "POST",
+                //    data: { UserID: key, UserData: jsonToString(values) }
+                //})
+            },
+            remove: function (key) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Supply/SupplyDel",
+                    method: "POST",
+                    data: { SupplyID: key }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            },
+            map: function (dataItem) {
+                dataItem.IsStop = toBool(dataItem.IsStop) ? true : false;
+                return dataItem;
+            }
+            //store:store
+        });
+        var grid = getDataGrid();
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    function onEditorPreparing(e) {
+        if (e.dataField === "SupplyID" && e.parentType === "dataRow") {
+            e.editorOptions.disabled = !e.row.isNewRow;
+        }
+    }
+
+    function addButton_click() {
+        var grid = getDataGrid();
+        grid.addRow();
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[1].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+</script>
+

@@ -1,0 +1,157 @@
+﻿@using JW.Order.Web.Models;
+@using JW.Common;
+@using System.Data;
+@using Newtonsoft.Json.Linq;
+@model RoleDetail
+
+@{
+    ViewBag.Title = "权限组明细";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isNew = ViewData["IsNew"].ExObjBool();
+    JArray jsonRole = JArray.Parse(ViewData["jsonRole"].ExObjString("[{}]"));
+    string jsonDetail = ViewData["jsonDetail"].ExObjString("[{}]");    
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items => {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("back")
+            .Text("返回")
+            .OnClick("back_click")
+    )
+    .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("save")
+            .Text("保存")
+            .OnClick("save_click")
+            .Disabled(!Model.InSave)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+    })
+)
+<br />
+<div class="settings">
+    <div class="column">
+        <div class="field">
+            <div class="label">编码</div>
+            <div class="value">
+                @(Html.DevExtreme().TextBox()
+                    .ID("txtRoleID")
+                    .Value(isNew?"":jsonRole[0]["RoleID"].ToString())
+                    .MaxLength(10)
+                    .Disabled(!isNew)
+                )
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="field">
+            <div class="label">名称</div>
+            <div class="value">
+                @(Html.DevExtreme().TextBox()
+                    .ID("txtRoleName")
+                    .Value(isNew?"":jsonRole[0]["RoleName"].ToString())
+                    .MaxLength(20)
+                )
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+@(Html.DevExtreme().TreeList()
+        .ID("tree-list")
+        .DataSource(new JS("getData()"))  
+        .KeyExpr("AutoID")
+        .ParentIdExpr("ParentAutoID")
+        .AutoExpandAll(true)
+        //.HasItemsExpr("HasItems")
+        //.ExpandedRowKeys(new[] { 0 })
+        .ShowRowLines(true)
+        .ShowBorders(true)
+        .ColumnAutoWidth(true)
+        .WordWrapEnabled(true)
+        .Editing(edit => edit.Mode(GridEditMode.Cell).AllowUpdating(true))
+    .Columns(columns =>
+     {
+         columns.Add().DataField("ModuleName").Caption("模块").AllowEditing(false);
+         columns.Add().DataField("InUsed").Caption("使用");
+         columns.Add().DataField("InQuery").Caption("查询");
+         columns.Add().DataField("InAdd").Caption("新增");
+         columns.Add().DataField("InEdit").Caption("修改");
+         columns.Add().DataField("InSave").Caption("保存");
+         columns.Add().DataField("InDel").Caption("删除");         
+         columns.Add().DataField("InPrint").Caption("导出");
+     })
+)
+
+<input id="abc" class="dx-hidden-input" value="@jsonDetail"/>
+
+<script>
+    function back_click() {
+        //DevExpress.ui.notify("Add button has been clicked!");
+        window.history.back(-1);
+    }
+
+    function dataSource_map(rowData) {
+        dataItem.InDel = toBool(dataItem.InDel) ? true : false;
+        
+        return dataItem;
+    }
+
+    function getData() {
+        var list = JSON.parse($("#abc").val());
+        list.forEach(function (item, i) {
+            list[i].InUsed = toBool(list[i].InUsed) ? true : false;
+            list[i].InQuery = toBool(list[i].InQuery) ? true : false;
+            list[i].InAdd = toBool(list[i].InAdd) ? true : false;
+            list[i].InEdit = toBool(list[i].InEdit)  ? true : false;
+            list[i].InSave = toBool(list[i].InSave) ? true : false;
+            list[i].InDel = toBool(list[i].InDel) ? true : false;
+            list[i].InPrint = toBool(list[i].InPrint) ? true : false;
+        });
+        return list;
+    }
+
+    function save_click() {
+        var txtRoleID = $("#txtRoleID").dxTextBox("instance");
+        var txtRoleName = $("#txtRoleName").dxTextBox("instance");
+        var json = {};
+        json.roleid = txtRoleID.option("value");
+        json.rolename = txtRoleName.option("value");
+        json.isnew = txtRoleID.option("disabled") ? false : true;
+        var tv = $("#tree-list").dxTreeList("instance");
+        var rows = tv.getVisibleRows();
+        var data = [];
+        if (rows.length > 0) {            
+            rows.forEach(function (row, i) {
+                data.push(row.data);
+            })            
+        }
+        json.data = data;
+        $.ajax({
+            type: 'POST',
+            url: "/account/saverole",
+            data: {
+                "roleid": json.roleid,
+                "isnew": json.isnew,
+                "datajson": JSON.stringify(json)
+            },
+            timeout: 30000,
+            success: function (datajson) {
+                DevExpress.ui.notify(datajson.msg, datajson.status ? "success" : "error", 3000);
+                if (json.isnew) {
+                    window.location.href = "/account/role";
+                }
+            }
+        });
+        //alert(JSON.stringify(json));
+    }
+</script>

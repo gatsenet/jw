@@ -1,0 +1,163 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "权限组";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items => {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("plus")
+            .Text("新增")
+            .OnClick("addButton_click")
+            .Disabled(!Model.InAdd)
+    )
+    .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("edit")
+            .Text("修改")
+            .OnClick("edit_click")
+            .Disabled(!Model.InSave)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+                .Button()
+                .Icon("remove")
+                .Text("删除")
+                .OnClick("delButton_click")
+                .Disabled(!Model.InDel)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.After);
+    })
+)
+<br />
+<div>
+    @(Html.DevExtreme().DataGrid().ShowBorders(true)
+        //.DataSource(d => d.Mvc().Key("RoleID").LoadAction("GetRoleList"))
+        .Columns(col=> {
+             col.Add().DataField("RoleID").Caption("编码");
+             col.Add().DataField("RoleName").Caption("名称");
+             col.Add().DataField("UserCount").Caption("在用用户数");
+         })
+        .Selection(s => s.Mode(SelectionMode.Single))
+        .ID("targetDataGrid")
+        .Paging(p => p.PageSize(10))
+        .ColumnAutoWidth(true)
+        //.OnSelectionChanged("selection_changed")
+    )
+</div>
+
+
+<script>
+    function getDataGridInstance() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
+
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            load: function (loadOptions) {
+                var result = [];
+                //$.ajax({
+                //    type: 'POST',
+                //    url: "/account/GetRoleList",
+                //    data: { },
+                //    timeout: 30000,
+                //    success: function (datajson) {
+                //        result = datajson;
+                //    }
+                //});
+                //return result;
+                return $.getJSON("/account/GetRoleList");
+            }
+        });
+        var grid = $("#targetDataGrid").dxDataGrid("instance");
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    function addButton_click() {
+        //DevExpress.ui.notify("Add button has been clicked!");
+        window.location.href = "/account/roledetail/0?type=add";
+    }
+
+    function delButton_click() {
+        var selectedRowsData = getDataGridInstance().getSelectedRowsData()[0];
+        if (selectedRowsData) {
+            $.ajax({
+                type: 'POST',
+                url: "/account/delrole",
+                data: {
+                    "roleid": selectedRowsData.RoleID
+                },
+                timeout: 30000,
+                success: function (datajson) {
+                    DevExpress.ui.notify(datajson.msg, datajson.status ? "success" : "error", 3000);
+                    if (datajson.status) {
+                        refreshButton_click();
+                    }                    
+                }
+            });
+            //DevExpress.ui.notify(selectedRowsData.RoleID, "warning", 3000);
+        }
+        else {
+            DevExpress.ui.notify("未选中数据", "warning", 3000);
+        }
+    }
+
+    function edit_click() {
+        var selectedRowsData = getDataGridInstance().getSelectedRowsData()[0];
+        if (selectedRowsData) {
+            //DevExpress.ui.notify(selectedRowsData.RoleID, "warning", 3000);
+            window.location.href = "/account/roledetail/" + selectedRowsData.RoleID;
+        }
+        else {
+            DevExpress.ui.notify("未选中数据", "warning", 3000);
+        }
+    }
+
+    function mapRoleList(item) {
+        return {
+            text: item.RoleName,
+            RoleID: item.RoleID
+        };
+    }
+
+    function selection_changed(selectedItems) {
+        var data = selectedItems.selectedRowsData[0];
+        if (data) {
+            DevExpress.ui.notify(data.RoleID);
+            //$(".employeeNotes").text(data.Notes);
+            //$(".employeePhoto").attr("src", data.Picture);
+        }
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[1].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+</script>

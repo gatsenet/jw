@@ -1,0 +1,310 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "用户管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items => {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("plus")
+            .Text("新增")
+            .OnClick("addButton_click")
+            .Disabled(!Model.InAdd)
+    )
+    .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+
+        //items.Add()
+        //    .Widget(w => w
+        //        .Button()
+        //        .Icon("remove")
+        //        .Text("删除")
+        //        .OnClick("delButton_click")
+        //        .Disabled(!Model.InDel)
+        //)
+        //.LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        //.Location(ToolbarItemLocation.After);
+    })
+)
+<br />
+@(Html.DevExtreme().DataGrid<BasicUser>().ShowBorders(true)
+        //.OnRowUpdating("onRowUpdating")
+        .OnEditorPreparing("onEditorPreparing")
+        //.DataSource(d => d.Mvc().Key("RoleID").LoadAction("GetRoleList"))
+        .Columns(col=> {
+            col.AddFor(m => m.UserID).Caption("编码").ValidationRules(v => v.AddRequired());//ValidationRules(v => v.AddAsync().ValidationCallback("validationCallback"))
+            col.AddFor(m=>m.UserName).Caption("名称").ValidationRules(v => v.AddRequired());
+            col.AddFor(m => m.UserPS).Caption("密码").ValidationRules(v => v.AddRequired());
+            col.AddFor(m => m.RoleID).Caption("权限组").ValidationRules(v => v.AddRequired()).Lookup(lookup => lookup
+                .DataSource(d => d.Mvc().LoadAction("GetRoleList").Key("RoleID"))
+                //.DataSource(d => d.WebApi().RouteName("TestApi").LoadAction("GetRoleList").Key("RoleID"))
+                .ValueExpr("RoleID")
+                .DisplayExpr("RoleName"));
+            //.EditCellTemplate(new TemplateName("DropDownBoxTemplate"))
+            //.Width(150);
+            col.AddFor(m => m.IsStop).Caption("停用");
+            col.AddFor(m => m.IsAdmin).Caption("管理员");
+            col.AddFor(m => m.IsAllCustomer).Caption("全部渠道");
+            col.AddFor(m => m.CustList).Caption("渠道权限").AllowSorting(false).Lookup(lookup => lookup
+                    .DataSource(d => d.Mvc().Controller("Customer").LoadAction("CustList").Key("CustomerID"))
+                    .ValueExpr("CustomerID")
+                    .DisplayExpr("CustomerName")
+                ).CellTemplate(new JS("cellTemplate"))
+                .CalculateFilterExpression("calculateFilterExpression")
+                .EditCellTemplate(new TemplateName("TagBoxTemplate"))
+                .Width(200);
+            col.AddFor(m => m.IsAllSupply).Caption("全部供应商");
+            col.AddFor(m => m.SupplyList).Caption("供应商权限").AllowSorting(false).Lookup(lookup => lookup
+                    .DataSource(d => d.Mvc().Controller("Supply").LoadAction("SupplyList").Key("SupplyID"))
+                    .ValueExpr("SupplyID")
+                    .DisplayExpr("SupplyName")
+                ).CellTemplate(new JS("cellTemplate"))
+                .CalculateFilterExpression("calculateFilterExpression")
+                .EditCellTemplate(new TemplateName("TagBoxSupplyTemplate"))
+                .Width(200);
+        })
+        .Selection(s => s.Mode(SelectionMode.Single))
+        .ID("targetDataGrid")
+        .Paging(p => p.PageSize(10))
+        .ColumnAutoWidth(true)
+        .Editing(e => e.Mode(GridEditMode.Popup)
+            .AllowUpdating(Model.InSave)
+            //.AllowAdding(true)
+            .AllowDeleting(Model.InDel)
+            .Texts(t=>t.AddRow("新增").DeleteRow("删除").EditRow("修改").CancelRowChanges("取消").SaveRowChanges("保存").ConfirmDeleteMessage("确定删除当前记录?"))
+            .Popup(p => p
+                .Title("用户信息")
+                .ShowTitle(true)
+                .Width(700)
+                .Height(525)
+            )
+            .Form(f => f.Items(items =>
+            {
+                items.AddGroup()
+                    .ColCount(2)
+                    .ColSpan(2)
+                    .Items(groupItems =>
+                    {
+                        groupItems.AddSimpleFor(m => m.UserID);
+                        groupItems.AddSimpleFor(m => m.UserName);
+                        groupItems.AddSimpleFor(m => m.UserPS);
+                        groupItems.AddSimpleFor(m => m.RoleID);
+                        //.Editor(edit => edit.Lookup()
+                        //    .Value(new JS("data.RoleID"))
+                        //    .DataSource(d => d.Mvc().LoadAction("GetRoleList").Key("RoleID"))
+                        //    .ValueExpr("RoleID")
+                        //    .DisplayExpr("RoleName"));
+                        groupItems.AddSimpleFor(m => m.IsStop);
+                        groupItems.AddSimpleFor(m => m.IsAdmin);
+                    });
+
+                items.AddGroup()
+                    .Caption("用户权限")
+                    .ColCount(2)
+                    .ColSpan(2)
+                    .Items(groupItems =>
+                    {
+                        groupItems.AddSimpleFor(m => m.IsAllCustomer);
+                        groupItems.AddSimpleFor(m => m.IsAllSupply);
+                        groupItems.AddSimpleFor(m => m.CustList);
+                        //.Editor(edit=>edit.TagBox()
+                        //    .DataSource(d => d.Mvc().Controller("Customer").LoadAction("CustList").Key("CustomerID"))
+                        //    .ValueExpr("CustomerID")
+                        //    .DisplayExpr("CustomerName")
+                        //    .ShowSelectionControls(true)
+                        //    .MaxDisplayedTags(3)
+                        //    .ShowMultiTagOnly(false)
+                        //    .ApplyValueMode(EditorApplyValueMode.UseButtons));
+                        groupItems.AddSimpleFor(m => m.SupplyList);
+                    });
+            }))
+         )
+    )
+
+@using (Html.DevExtreme().NamedTemplate("TagBoxTemplate"))
+{
+    @(Html.DevExtreme().TagBox()
+        .DataSource(d => d.Mvc().Controller("Customer").LoadAction("CustList").Key("CustomerID"))
+        .Value(new JS("value"))
+        .ValueExpr("CustomerID")
+        .DisplayExpr("CustomerName")
+        .ShowSelectionControls(true)
+        .MaxDisplayedTags(3)
+        .ShowMultiTagOnly(false)
+        .ApplyValueMode(EditorApplyValueMode.UseButtons)
+        .SearchEnabled(true)
+        .OnValueChanged("function(e) { setValue(e.value); }")
+        .OnSelectionChanged("function(e) { component.updateDimensions(); }")
+    )
+}
+@using (Html.DevExtreme().NamedTemplate("TagBoxSupplyTemplate"))
+{
+    @(Html.DevExtreme().TagBox()
+        .DataSource(d => d.Mvc().Controller("Supply").LoadAction("SupplyList").Key("SupplyID"))
+        .Value(new JS("value"))
+        .ValueExpr("SupplyID")
+        .DisplayExpr("SupplyName")
+        .ShowSelectionControls(true)
+        .MaxDisplayedTags(3)
+        .ShowMultiTagOnly(false)
+        .ApplyValueMode(EditorApplyValueMode.UseButtons)
+        .SearchEnabled(true)
+        .OnValueChanged("function(e) { setValue(e.value); }")
+        .OnSelectionChanged("function(e) { component.updateDimensions(); }")
+    )
+}
+
+
+<script>
+    function cellTemplate(container, options) {
+        var noBreakSpace = "\u00A0",
+            text = (options.value || []).map(element => {
+                return options.column.lookup.calculateCellValue(element);
+            }).join(", ");
+        container.text(text || noBreakSpace).attr("title", text);
+    }
+
+    function calculateFilterExpression(filterValue, selectedFilterOperation, target) {
+        if (target === "search" && typeof (filterValue) === "string") {
+            return [this.dataField, "contains", filterValue]
+        }
+        return function (data) {
+            return (data.CustList || []).indexOf(filterValue) !== -1
+        }
+    }
+
+    function onSelectionChanged(selectionChangedArgs, component) {
+        var setValue = component.option('setValue');
+        var selectedRowKey = selectionChangedArgs.selectedRowKeys[0];
+
+        component.option('value', selectedRowKey);
+        setValue(selectedRowKey);
+        if (selectionChangedArgs.selectedRowKeys.length > 0) {
+            component.close();
+        }
+    }
+
+    function getDataGrid() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            key: "UserID",
+            load: function (loadOptions) {
+                var result = [];
+                return $.getJSON("/account/GetUserList");
+            },
+            insert: function (values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/account/UserAdd",
+                    method: "POST",
+                    data: { UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            },
+            update: function (key, values) {
+                var deferred = $.Deferred();                
+                $.ajax({
+                    url: "/account/UserUpdate",
+                    method: "POST",
+                    data: { UserID: key, UserData: jsonToString(values) }                
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText ));
+                    });
+                return deferred.promise();
+                //return $.ajax({
+                //    url: "/account/UpdateUser",
+                //    method: "POST",
+                //    data: { UserID: key, UserData: jsonToString(values) }
+                //})
+            },
+            remove: function (key) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/account/UserDel",
+                    method: "POST",
+                    data: { UserID: key }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            }
+            //store:store
+        });
+        var grid = getDataGrid();
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    function onRowUpdating() {
+
+    }
+
+    function validationCallback(params) {
+        return $.ajax({
+            url: '/account/CheckUserID',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                UserID: params.value
+            })
+        });
+    }
+
+    function onEditorPreparing(e) {
+        if (e.dataField === "UserID" && e.parentType === "dataRow") {
+            e.editorOptions.disabled = !e.row.isNewRow;
+        }
+    }
+
+    function addButton_click() {
+        var grid = getDataGrid();
+        grid.addRow();
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[1].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+</script>

@@ -1,0 +1,186 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "渠道";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items => {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("plus")
+            .Text("新增")
+            .OnClick("addButton_click")
+            .Disabled(!Model.InAdd)
+    )
+    .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+
+    })
+)
+<br />
+@(Html.DevExtreme().DataGrid().ShowBorders(true)
+        //.OnRowUpdating("onRowUpdating")
+        .OnEditorPreparing("onEditorPreparing")
+        .Columns(col=> {
+            col.Add().DataField("CustomerID").Caption("编码").ValidationRules(v => v.AddRequired().Message("必填"));//ValidationRules(v => v.AddAsync().ValidationCallback("validationCallback"))
+            col.Add().DataField("CustomerName").Caption("名称").ValidationRules(v => v.AddRequired().Message("必填"));
+            col.Add().DataField("CustomerFullName").Caption("全称");
+            col.Add().DataField("Company").Caption("公司");
+            col.Add().DataField("ParentCustomer").Caption("父级渠道");
+            col.Add().DataField("Address").Caption("地址");
+            col.Add().DataField("Tel").Caption("电话");
+            col.Add().DataField("QQ");
+            col.Add().DataField("Remark").Caption("备注");
+            col.Add().DataField("PayPassword").Caption("支付密码").Visible(false);
+            col.Add().DataField("IsStop").Caption("停用");
+        })
+        .Selection(s => s.Mode(SelectionMode.Single))
+        .ID("targetDataGrid")
+        .Paging(p => p.PageSize(10))
+        .ColumnAutoWidth(true)
+        .Editing(e => e.Mode(GridEditMode.Popup)
+            .AllowUpdating(Model.InSave)
+            //.AllowAdding(true)
+            .AllowDeleting(Model.InDel)
+            .Texts(t=>t.AddRow("新增").DeleteRow("删除").EditRow("修改").CancelRowChanges("取消").SaveRowChanges("保存").ConfirmDeleteMessage("确定删除当前记录?"))
+            .Popup(p => p
+                .Title("渠道信息")
+                .ShowTitle(true)
+                .Width(700)
+                .Height(525)
+            )
+            .Form(f => f.Items(items =>
+            {
+                items.AddGroup()
+                    .ColCount(2)
+                    .ColSpan(2)
+                    .Items(groupItems =>
+                    {
+                        groupItems.AddSimple().DataField("CustomerID");
+                        groupItems.AddSimple().DataField("CustomerName");
+                        groupItems.AddSimple().DataField("CustomerFullName");
+                        groupItems.AddSimple().DataField("Company");
+                        groupItems.AddSimple().DataField("ParentCustomer");
+                        groupItems.AddSimple().DataField("Tel");
+                        groupItems.AddSimple().DataField("QQ");
+                        groupItems.AddSimple().DataField("Address");
+                        groupItems.AddSimple().DataField("PayPassword");
+                        groupItems.AddSimple().DataField("IsStop");
+                        groupItems.AddSimple().DataField("Remark").ColSpan(2);
+                    });
+            }))
+         )
+    )
+
+<script>
+    function getDataGrid() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            key: "CustomerID",
+            load: function (loadOptions) {
+                var result = [];
+                return $.getJSON("/Customer/CustList");
+            },
+            insert: function (values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Customer/CustAdd",
+                    method: "POST",
+                    data: { UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            },
+            update: function (key, values) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Customer/CustUpdate",
+                    method: "POST",
+                    data: { CustID: key, UserData: jsonToString(values) }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText ));
+                    });
+                return deferred.promise();
+                //return $.ajax({
+                //    url: "/account/UpdateUser",
+                //    method: "POST",
+                //    data: { UserID: key, UserData: jsonToString(values) }
+                //})
+            },
+            remove: function (key) {
+                var deferred = $.Deferred();
+                $.ajax({
+                    url: "/Customer/CustDel",
+                    method: "POST",
+                    data: { CustID: key }
+                })
+                    .done(function (data) {
+                        deferred.resolve();
+                        //成功
+                        //refreshButton_click();
+                    })
+                    .fail(function (e, textStatus) {
+                        deferred.reject(entityToString(e.statusText));
+                    });
+                return deferred.promise();
+            },
+            map: function (dataItem) {
+                dataItem.IsStop = toBool(dataItem.IsStop) ? true : false;
+                return dataItem;
+            }
+            //store:store
+        });
+        var grid = getDataGrid();
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    function onEditorPreparing(e) {
+        if (e.dataField === "CustomerID" && e.parentType === "dataRow") {
+            e.editorOptions.disabled = !e.row.isNewRow;
+        }
+    }
+
+    function addButton_click() {
+        var grid = getDataGrid();
+        grid.addRow();
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[1].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+</script>

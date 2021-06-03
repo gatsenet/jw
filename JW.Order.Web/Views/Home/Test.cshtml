@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewBag.Title = "Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Test</h2>
+
+<div class="dx-fieldset">
+    <div class="dx-field">
+        <div class="dx-field-label">组</div>
+        <div class="dx-field-value">
+            @(Html.DevExtreme().TextBox().ID("txtGroupName").ShowClearButton(true)
+                )
+        </div>
+    </div>
+    <div class="dx-field">
+        @(Html.DevExtreme().Button()
+                        .Text(ButtonStylingMode.Contained.ToString())
+                        .Type(ButtonType.Default)
+                        .StylingMode(ButtonStylingMode.Contained)
+                        .Width(120)
+                        .OnClick("refreshGrid")
+                    )
+    </div>
+</div>
+<div>
+    @(Html.DevExtreme().DataGrid().ShowBorders(true)
+    .DataSource(d => d.WebApi().Controller("Test").Key("SettingID").LoadAction("GetSetting").LoadParams(new { GroupName = new JS("getTxtBoxValue") }))
+    .Columns(col=> {
+        col.Add().DataField("SettingID").Caption("编码");
+        col.Add().DataField("SettingName").Caption("名称");
+        col.Add().DataField("SettingValue").Caption("值");
+    })
+    .ID("targetDataGrid")
+    .Paging(p => p.PageSize(10))
+    .ColumnAutoWidth(true)
+)
+</div>
+<script>
+    function getTxtBoxValue() {
+        return $("#txtGroupName").dxTextBox("instance").option("value");
+    }
+
+    function refreshGrid() {
+        $("#targetDataGrid").dxDataGrid("instance").refresh();
+    }
+
+    function notify(e) {
+        var buttonText = e.component.option("text");
+        DevExpress.ui.notify("The " + buttonText + " button was clicked");
+    }
+</script>

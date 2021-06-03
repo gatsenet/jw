@@ -1,0 +1,25 @@
+﻿<ul class="nav navbar-nav">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item">
+            <a class="nav-link " title="已登录">当前用户：@User.Identity.Name</a>
+        </li>
+        @*<li class="nav-item">@Html.ActionLink("修改密码", "ChangePassword", "Account")</li>*@
+        <li class="nav-item">
+            <a class="nav-link " title="修改密码" href="/Account/ChangePassword">修改密码</a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline " id="formLogoff" action="/account/logoff">
+                @*<button type="submit" class="nav-link btn-link ">注销</button>*@
+                <a class="nav-link " title="注销" href="javascript:void(0)"  onclick="javascript:document.getElementById('formLogoff').submit()">注销</a>
+            </form>
+            
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link" href="/account/logon">用户登录</a>
+        </li>
+    }
+</ul>

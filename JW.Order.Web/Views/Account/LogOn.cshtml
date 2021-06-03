@@ -1,0 +1,51 @@
+﻿@using JW.Order.Web.Models;
+@model LogOnModel
+@{
+    //Layout = null;
+    ViewData["Title"] = "用户登录";
+}
+
+@using (Html.BeginForm("logon", "account", FormMethod.Post))
+{
+    using (Html.DevExtreme().ValidationGroup())
+    {
+        <div class="settings">
+            <div class="column">
+                <div class="field">
+                    <div class="label">用户名</div>
+                    <div class="value">
+                        @(Html.DevExtreme().TextBoxFor(m=>m.UserName)
+                    .ID("txtUserID")
+                    .MaxLength(20)
+                )
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="label">密码</div>
+                    <div class="value">
+                        @(Html.DevExtreme().TextBoxFor(m=>m.Password)
+                    .ID("txtPS")
+                    .MaxLength(20)
+                    .Mode(TextBoxMode.Password)
+                )
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="label"></div>
+                    <div class="value">
+                        @Html.ValidationSummary(false)
+                        @(Html.DevExtreme().Button()
+                        .Text("登录")
+                        .Type(ButtonType.Default)
+                        .StylingMode(ButtonStylingMode.Contained)
+                        .Width(120)
+                        .UseSubmitBehavior(true)
+                    )
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dx-hidden"><input type="text" name="returnurl" class="form-control dx-hidden-input" placeholder="" aria-describedby="basic-addon1" value="@Model.ReturnUrl" /></div>
+    }
+}
+

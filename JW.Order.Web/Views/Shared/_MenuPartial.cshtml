@@ -1,0 +1,19 @@
+﻿@if (User.Identity.IsAuthenticated)
+{
+    @(Html.DevExtreme().Menu()
+            .ID("menu")
+            .DataSource(d => d.Mvc().Controller("Home").LoadAction("GetMenu"))
+            .HideSubmenuOnMouseLeave(false)
+            .ShowFirstSubmenuMode(ShowSubmenuMode.OnHover)
+            .OnItemClick("menuItem_click")
+            .CssClass("nav-item")
+    )
+}
+<script>
+    function menuItem_click(data) {
+        var item = data.itemData;
+        if (item.link) {
+            window.location.href = item.link;
+        }
+    }
+</script>
