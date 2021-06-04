@@ -45,6 +45,7 @@
     <Compile Include="BasicSetting.cs" />
     <Compile Include="BasicUser.cs" />
     <Compile Include="Customer.cs" />
+    <Compile Include="LogSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunProcedure.cs" />
     <Compile Include="Supply.cs" />

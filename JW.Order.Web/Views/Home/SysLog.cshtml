@@ -1,0 +1,136 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "系统日志";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="settings">
+    <div class="column">
+        <div class="field">
+            <div class="label">开始</div>
+            <div class="value">
+                @(Html.DevExtreme().DateBox()
+                    .ID("dateB")
+                    .Type(DateBoxType.Date)
+                    .ShowClearButton(true)
+                    .DisplayFormat("yyyy-MM-dd")
+                )
+            </div>
+        </div>
+        <div class="field">
+            <div class="label">结束</div>
+            <div class="value">
+                @(Html.DevExtreme().DateBox()
+                    .ID("dateE")
+                    .Type(DateBoxType.Date)
+                    .ShowClearButton(true)
+                    .DisplayFormat("yyyy-MM-dd")
+                )
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="field">
+            <div class="label">类型</div>
+            <div class="value">
+                @(Html.DevExtreme().TagBox()
+                    .ID("txtLogType")
+                    .ShowClearButton(true)
+                    .ShowSelectionControls(true)
+                    .ApplyValueMode(EditorApplyValueMode.UseButtons)
+                    .Placeholder("不选择视为全部")
+                    .DataSource(d => d.Mvc().LoadAction("LogTypeList").Key("LogSortName"))
+                    .DisplayExpr("LogSortName")
+                    .ValueExpr("LogSortName")
+                )
+            </div>
+        </div>
+        <div class="field">
+            <div class="label">事件</div>
+            <div class="value">
+                @(Html.DevExtreme().TagBox()
+                    .ID("txtLogAction")
+                    .ShowClearButton(true)
+                    .ShowSelectionControls(true)
+                    .ApplyValueMode(EditorApplyValueMode.UseButtons)
+                    .Placeholder("不选择视为全部")
+                    .DataSource(d => d.Mvc().LoadAction("LogActionList").Key("LogSortName"))
+                    .DisplayExpr("LogSortName")
+                    .ValueExpr("LogSortName")
+                )
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="field">
+            <div class="label">类型</div>
+            <div class="value">
+                @(Html.DevExtreme().TextBox()
+                    .ID("txtLike")
+                    .Placeholder("模糊查找")
+                    .ShowClearButton(true)
+                )
+            </div>
+        </div>
+        <div class="field">
+            <div class="label">结果</div>
+            <div class="value">
+                @(Html.DevExtreme().RadioGroup()
+                    .DataSource(d=>d.WebApi().RouteName("CommonApi").LoadAction("BoolList").Key("ID"))
+                    .ValueExpr("ID")
+                    .DisplayExpr("Name")
+                    .Value(2)
+                    .Layout(Orientation.Horizontal)
+                )
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="field">
+            <div class="label"></div>
+            <div class="value">
+            </div>
+        </div>
+        <div class="field">
+            <div class="label"></div>
+            <div class="value">
+                @(Html.DevExtreme().Button()
+                    .ID("btnQuery")
+                    .Text("查询")
+                    .Icon("find")
+                    .Disabled(!Model.InQuery)
+                    .Type(ButtonType.Default)
+                    .StylingMode(ButtonStylingMode.Contained)
+                    .Width(100)
+                    .OnClick("toQuery")
+                )
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+@(Html.DevExtreme().DataGrid().ShowBorders(true)
+    //.DataSource(d => d.Mvc().Key("RoleID").LoadAction("GetRoleList"))
+    .Columns(col=> {
+        col.Add().DataField("LogType").Caption("类型");
+        col.Add().DataField("LogAction").Caption("事件");
+        col.Add().DataField("Result").Caption("结果");
+        col.Add().DataField("BizData").Caption("执行情况");
+        col.Add().DataField("NewData").Caption("新数据");
+        col.Add().DataField("OldData").Caption("源数据");
+        col.Add().DataField("DateBegin").Caption("开始");
+        col.Add().DataField("DateEnd").Caption("结束");
+    })
+    .ID("targetDataGrid")
+    .Paging(p => p.PageSize(20))
+    .ColumnAutoWidth(true)
+    //.OnSelectionChanged("selection_changed")
+)
+<script>
+    function toQuery() {
+
+    }
+</script>
+

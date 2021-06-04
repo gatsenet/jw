@@ -173,5 +173,25 @@ namespace JW.Order.Web.Controllers {
             }
             return new EmptyResult();
         }
+
+        public ActionResult SysLog()
+        {
+            string name = User.Identity.Name;
+            DataTable dt = DB.BasicUser.p_BasicUser_GetInfo(name, 3, 2, "SysLog");
+            Models.RoleDetail detail = MyUser.ConvertRoleDetail(dt);
+            return View(detail);
+        }
+
+        public ActionResult LogTypeList()
+        {
+            DataTable dt = DB.LogSystem.GetLogType();
+            return Content(dt.ExDataTableToJson(), "application/json");
+        }
+
+        public ActionResult LogActionList()
+        {
+            DataTable dt = DB.LogSystem.GetLogAction();
+            return Content(dt.ExDataTableToJson(), "application/json");
+        }
     }
 }
