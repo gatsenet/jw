@@ -10,7 +10,7 @@ namespace JW.DB
 {
     public class LogSystem
     {
-        public static DataTable GetInfo(string dateb="",string datee="",string logtype="",string action ="",string like="")
+        public static DataTable GetInfo(string dateb="",string datee="",string logtype="",string action ="",int result=2, string like="")
         {
             DbParameters paras = new DbParameters();
             paras.Add("@type", 0);
@@ -18,6 +18,8 @@ namespace JW.DB
             paras.Add("@datee", datee);
             paras.Add("@logtype", logtype);
             paras.Add("@action", action);
+            paras.Add("@result", result);
+            paras.Add("@like", like);
             DataTable dt = new DbHelper().CreateDataTable("p_LogSystem_Info", paras);
             return dt;
         }

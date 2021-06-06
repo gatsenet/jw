@@ -37,6 +37,7 @@
             <div class="value">
                 @(Html.DevExtreme().TagBox()
                     .ID("txtLogType")
+                    .MaxDisplayedTags(2)
                     .ShowClearButton(true)
                     .ShowSelectionControls(true)
                     .ApplyValueMode(EditorApplyValueMode.UseButtons)
@@ -52,6 +53,7 @@
             <div class="value">
                 @(Html.DevExtreme().TagBox()
                     .ID("txtLogAction")
+                    .MaxDisplayedTags(2)
                     .ShowClearButton(true)
                     .ShowSelectionControls(true)
                     .ApplyValueMode(EditorApplyValueMode.UseButtons)
@@ -78,6 +80,7 @@
             <div class="label">结果</div>
             <div class="value">
                 @(Html.DevExtreme().RadioGroup()
+                    .ID("rgBool")
                     .DataSource(d=>d.WebApi().RouteName("CommonApi").LoadAction("BoolList").Key("ID"))
                     .ValueExpr("ID")
                     .DisplayExpr("Name")
@@ -117,20 +120,47 @@
         col.Add().DataField("LogType").Caption("类型");
         col.Add().DataField("LogAction").Caption("事件");
         col.Add().DataField("Result").Caption("结果");
-        col.Add().DataField("BizData").Caption("执行情况");
-        col.Add().DataField("NewData").Caption("新数据");
-        col.Add().DataField("OldData").Caption("源数据");
+        col.Add().DataField("BizData").Caption("执行情况").ShowEditorAlways(true);
+        col.Add().DataField("NewData").Caption("新数据").Width(300).MinWidth(100).ShowEditorAlways(true);
+        col.Add().DataField("OldData").Caption("源数据").Width(300).MinWidth(100).ShowEditorAlways(true);
         col.Add().DataField("DateBegin").Caption("开始");
         col.Add().DataField("DateEnd").Caption("结束");
     })
     .ID("targetDataGrid")
     .Paging(p => p.PageSize(20))
-    .ColumnAutoWidth(true)
-    //.OnSelectionChanged("selection_changed")
+    .ColumnAutoWidth(true)    
+    .SearchPanel(searchPanel => searchPanel
+        .Visible(true)
+        .Width(240)
+        .Placeholder("表内查找")
+    )
+    .HeaderFilter(headerFilter => headerFilter.Visible(true))
+//.OnSelectionChanged("selection_changed")
 )
 <script>
-    function toQuery() {
+    function getDataGridInstance() {
+        return $("#targetDataGrid").dxDataGrid("instance");
+    }
 
+    function toQuery() {
+        var grid = getDataGridInstance();
+        var infiniteListSource = new DevExpress.data.DataSource({
+            load: function (loadOptions) {
+                var dateb = $("#dateB").dxDateBox("option", "text");
+                var datee = $("#dateE").dxDateBox("option", "text");
+                var txtLogType = $("#txtLogType").dxTagBox("option", "value");
+                var txtLogAction = $("#txtLogAction").dxTagBox("option", "value");
+                var txtLike = $("#txtLike").dxTextBox("option", "text");
+                var rgBool = $("#rgBool").dxRadioGroup("option", "value");
+                return $.getJSON("/home/GetLogList", { "dateb": dateb, "datee": datee, "logtype": txtLogType.toString(), "logaction": txtLogAction.toString(), "result": rgBool, "like": txtLike });
+            },
+            map: function (dataItem) {
+                dataItem.Result = toBool(dataItem.Result);
+                return dataItem;
+            }
+        });
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
     }
 </script>
 

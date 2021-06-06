@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JW.Common", "JW.Common\JW.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JW.DB", "JW.DB\JW.DB.csproj", "{AF8057D9-4382-49E0-AA86-DE1DC08DF2C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JW.API", "JW.API\JW.API.csproj", "{1963292D-C4CE-433D-BBFC-3E4ABCB4EDF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JW.Console", "JW.Console\JW.Console.csproj", "{F6CA75FD-23D1-4BE9-9268-09E183A94D4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{AF8057D9-4382-49E0-AA86-DE1DC08DF2C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF8057D9-4382-49E0-AA86-DE1DC08DF2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF8057D9-4382-49E0-AA86-DE1DC08DF2C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1963292D-C4CE-433D-BBFC-3E4ABCB4EDF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1963292D-C4CE-433D-BBFC-3E4ABCB4EDF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1963292D-C4CE-433D-BBFC-3E4ABCB4EDF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1963292D-C4CE-433D-BBFC-3E4ABCB4EDF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6CA75FD-23D1-4BE9-9268-09E183A94D4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6CA75FD-23D1-4BE9-9268-09E183A94D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6CA75FD-23D1-4BE9-9268-09E183A94D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6CA75FD-23D1-4BE9-9268-09E183A94D4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

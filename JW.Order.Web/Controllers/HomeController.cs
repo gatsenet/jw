@@ -193,5 +193,11 @@ namespace JW.Order.Web.Controllers {
             DataTable dt = DB.LogSystem.GetLogAction();
             return Content(dt.ExDataTableToJson(), "application/json");
         }
+
+        public ActionResult GetLogList(string dateb, string datee, string logtype, string logaction,int result, string like)
+        {
+            DataTable dt = DB.LogSystem.GetInfo(dateb, datee, logtype, logaction, result, like);
+            return Content(dt.ExDataTableToJson(), "application/json");
+        }
     }
 }

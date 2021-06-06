@@ -233,6 +233,8 @@ namespace JW.Common
             if (item.IfModifiedSince != null) request.IfModifiedSince = Convert.ToDateTime(item.IfModifiedSince);
             //Accept
             request.Accept = item.Accept;
+            //AutomaticDecompression
+            if (item.IsGzip) request.AutomaticDecompression = DecompressionMethods.GZip;
             //ContentType返回类型
             request.ContentType = item.ContentType;
             //UserAgent客户端的访问类型，包括浏览器版本和操作系统信息
@@ -241,6 +243,7 @@ namespace JW.Common
             encoding = item.Encoding;
             //设置安全凭证
             request.Credentials = item.ICredentials;
+            
             //设置Cookie
             SetCookie(item);
             //来源地址
@@ -703,6 +706,12 @@ namespace JW.Common
             set { _IfModifiedSince = value; }
         }
 
+        private bool _isGzip = false;
+        public bool IsGzip
+        {
+            get { return _isGzip; }
+            set { _isGzip = value; }
+        }
     }
     /// <summary>
     /// Http返回参数类
