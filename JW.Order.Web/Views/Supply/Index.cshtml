@@ -39,8 +39,13 @@
         .Columns(col=> {
             col.Add().DataField("SupplyID").Caption("编码").ValidationRules(v => v.AddRequired().Message("必填"));//ValidationRules(v => v.AddAsync().ValidationCallback("validationCallback"))
             col.Add().DataField("SupplyName").Caption("名称").ValidationRules(v => v.AddRequired().Message("必填"));
-            col.Add().DataField("SupplyFullName").Caption("全称");            
+            col.Add().DataField("SupplyFullName").Caption("全称");
             col.Add().DataField("IsStop").DataType(GridColumnDataType.Boolean).Caption("停用");
+            col.Add().DataField("IsApiStock").DataType(GridColumnDataType.Boolean).Caption("库存接口");
+            col.Add().DataField("ApiName").Caption("接口名称").Visible(false);
+            col.Add().DataField("ApiUrl").Caption("接口地址").Visible(false);
+            col.Add().DataField("ApiKey").Caption("接口秘钥").Visible(false);
+            col.Add().DataField("ApiCustID").Caption("接口渠道ID").Visible(false);
         })
         .Selection(s => s.Mode(SelectionMode.Single))
         .ID("targetDataGrid")
@@ -68,6 +73,18 @@
                         groupItems.AddSimple().DataField("SupplyName");
                         groupItems.AddSimple().DataField("SupplyFullName");
                         groupItems.AddSimple().DataField("IsStop");
+                    });
+                items.AddGroup()
+                    .Caption("接口API设置")
+                    .ColCount(2)
+                    .ColSpan(2)
+                    .Items(groupItems =>
+                    {
+                        groupItems.AddSimple().DataField("IsApiStock");
+                        groupItems.AddSimple().DataField("ApiName");
+                        groupItems.AddSimple().DataField("ApiUrl").ColSpan(2);
+                        groupItems.AddSimple().DataField("ApiKey").ColSpan(2);
+                        groupItems.AddSimple().DataField("ApiCustID");
                     });
             }))
          )
@@ -142,7 +159,8 @@
                 return deferred.promise();
             },
             map: function (dataItem) {
-                dataItem.IsStop = toBool(dataItem.IsStop) ? true : false;
+                dataItem.IsStop = toBool(dataItem.IsStop);
+                dataItem.IsApiStock = toBool(dataItem.IsApiStock);
                 return dataItem;
             }
             //store:store

@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,12 +46,21 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sanse.cs" />
+    <Compile Include="ToRun.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JW.Common\JW.Common.csproj">
       <Project>{ef3138e7-24ad-44b8-851d-2680669dc9d4}</Project>
       <Name>JW.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JW.DB\JW.DB.csproj">
+      <Project>{af8057d9-4382-49e0-aa86-de1dc08df2c3}</Project>
+      <Name>JW.DB</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

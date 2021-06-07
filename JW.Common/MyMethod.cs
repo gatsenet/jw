@@ -56,6 +56,13 @@ namespace JW.Common
             return returnStr;
         }
 
+        public static string ToGetApiBackString(Dictionary<string, string> dic, bool isgzip = false, bool isjson = true, int timeout = 2)
+        {
+            string url = dic["url"].ExObjString();
+            dic.Remove("url");
+            return ToGetApiBackString(url, dic, isgzip, isjson, timeout);
+        }
+
         public static string ToGetApiBackString(string url, Dictionary<string, string> dic, bool isgzip=false, bool isjson=true, int timeout = 2)
         {
             string returnStr = "";

@@ -16,7 +16,7 @@ namespace JW.Common
                 {
                     if (_connectionString == "")
                     {
-                        _connectionString = string.Format("Data Source={0};Initial Catalog={1};Persist Security Info=True;User ID={2};Password={3}", UtilConf.GetAppConfigValue("DBSERVER"), UtilConf.GetAppConfigValue("DBNAME"), UtilConf.GetAppConfigValue("DBUSER"), UtilConf.GetAppConfigDBPassword("DBPASSWORD"));
+                        _connectionString = string.Format("Data Source={0};Initial Catalog={1};Persist Security Info=True;User ID={2};Password={3}", UtilConf.GetAppConfigValue("DBSERVER"), UtilConf.GetAppConfigValue("DBNAME"), UtilConf.GetAppConfigValue("DBUSER"), UtilConf.GetAppConfigValue("DBPASSWORD"));
                     }
 
                 }
