@@ -20,6 +20,17 @@ namespace JW.DB
             return dt;
         }
 
+        public static string GetSettingValue(string SettingID)
+        {
+            DataTable dt = GetSettingList(SettingID);
+            string value = "";
+            if (dt.ExDataTableNotNullEmpty())
+            {
+                value = dt.Rows[0]["SettingValue"].ExObjString();
+            }
+            return value;
+        }
+
         public static bool SettingInfo(string SettingID, int type, string datajson, out string msg)
         {
             bool isok = false;
@@ -38,6 +49,46 @@ namespace JW.DB
         public static bool UpdateSetting(string SettingID,string datajson,out string msg)
         {
             return SettingInfo(SettingID, 2, datajson, out msg);
+        }
+
+        /// <summary>
+        /// 供应商全局库存更新时间点(小时点)
+        /// </summary>
+        public static int Stock_FullUpdate_Period
+        {
+            get { return GetSettingValue("Stock_FullUpdate_Period").ExObjInt32(1); }
+        }
+
+        /// <summary>
+        /// 供应商时段库存更新间隔(每N小时)
+        /// </summary>
+        public static int Stock_TimeUpdate_Period
+        {
+            get { return GetSettingValue("Stock_TimeUpdate_Period").ExObjInt32(1); }
+        }
+
+        /// <summary>
+        /// 供应商时段库存更新上次更新时间
+        /// </summary>
+        public static DateTime Stock_TimeUpdate_LastTime
+        {
+            get { return GetSettingValue("Stock_TimeUpdate_LastTime").ExObjDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")); }
+        }
+
+        /// <summary>
+        /// 供应商全局库存更新启用
+        /// </summary>
+        public static bool Stock_FullUpdate_Enable
+        {
+            get { return GetSettingValue("Stock_FullUpdate_Enable").ExObjBool(); }
+        }
+
+        /// <summary>
+        /// 供应商时段库存更新启用
+        /// </summary>
+        public static bool Stock_TimeUpdate_Enable
+        {
+            get { return GetSettingValue("Stock_TimeUpdate_Enable").ExObjBool(); }
         }
     }
 }

@@ -30,7 +30,7 @@ namespace JW.Console
             //JArray jo = (JArray)serializer.Deserialize(reader);
 
             //JW.API.Sanse.GetCustomerOnhandByStyleList('data.sanse.com.cn:9000', '84d1cf38-de5a-4283-902e-a12448cf3bd7', 'X31', '', out str);
-            API.ToRun.UpdateStock();
+            API.ToRun.UpdateStockByDate(DB.BasicSetting.Stock_TimeUpdate_LastTime, DateTime.Now);
         }
 
         private static void Init()
