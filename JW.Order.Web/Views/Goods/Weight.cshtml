@@ -1,0 +1,172 @@
+﻿@using JW.Order.Web.Models;
+@model RoleDetail
+@{
+    ViewBag.Title = "商品重量";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/my/exceljs.min.js"></script>
+<script src="~/Scripts/my/FileSaver.min.js"></script>
+<script src="~/Scripts/my/polyfill.min.js"></script>
+
+<div id="bar">
+    @(Html.DevExtreme().Toolbar()
+    .ID("toolbar")
+    .Items(items =>
+    {
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("refresh")
+            .Text("查询")
+            .OnClick("refreshButton_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+            .Widget(w => w
+            .Button()
+            .Icon("exportxlsx")
+            .Text("导出")
+            .OnClick("xlsout_click")
+            .Disabled(!Model.InQuery)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+        items.Add()
+        .Widget(w => w
+            .Button()
+            .Icon("xlsxfile")
+            .Text("导入")
+            .OnClick("xlsin_click")
+            .Disabled(!Model.InSave)
+        )
+        .LocateInMenu(ToolbarItemLocateInMenuMode.Auto)
+        .Location(ToolbarItemLocation.Before);
+
+    })
+)
+</div>
+@(Html.DevExtreme().FileUploader()
+    .ID("file-uploader")
+    .Name("myFile")
+    .Accept("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    //application/vnd.ms-excel
+    .Multiple(false)
+    .LabelText("")
+    .MaxFileSize(4000000)
+    .UploadMode(FileUploadMode.Instantly)
+    .UploadUrl(Url.Action("UploadFile"))
+    .OnUploadStarted("startUpload")
+    .OnUploaded("upLoaded")
+    .OnUploadError("uploadErr")
+    .Visible(false)
+)
+@(Html.DevExtreme().LoadPanel()
+    .ID("loadPanel")
+    .ShadingColor("rgba(0,0,0,0.4)")
+    .Position(p => p.Of("#bar"))
+    .Visible(false)
+    .ShowIndicator(true)
+    .ShowPane(true)
+    .Shading(true)
+    .CloseOnOutsideClick(false)
+)
+<br />
+<div class="">
+    @(Html.DevExtreme().DataGrid()
+    .ID("goodsGrid")
+    //.DataSource(d=>d.Mvc().LoadAction("GetWeightList").Key("StyleID"))
+    .ColumnAutoWidth(true)
+    .ShowRowLines(true)
+    .RowAlternationEnabled(true)
+    .Columns(col=> {
+        col.Add().DataField("StyleID").Caption("编码");
+        col.Add().DataField("StyleIDWeight").Caption("重量").DataType(GridColumnDataType.Number).Format("#,##0.00");
+    })
+    .SearchPanel(searchPanel => searchPanel
+        .Visible(true)
+        .Width(200)
+        .Placeholder("搜索...")
+    )
+    .Paging(p=>p.PageSize(50))
+    .Width(800)
+)
+</div>
+<script>
+    function getDataGrid() {
+        return $("#goodsGrid").dxDataGrid("instance");
+    }
+
+    function getLoadPanelInstance() {
+        return $("#loadPanel").dxLoadPanel("instance");
+    }
+
+    function refreshButton_click() {
+        var infiniteListSource = new DevExpress.data.DataSource({
+            key: "StyleID",
+            load: function (loadOptions) {
+                return $.getJSON("/Goods/GetWeightList");
+            },
+        });
+        var grid = getDataGrid();
+        grid.option("dataSource", infiniteListSource);
+        grid.refresh();
+    }
+
+    function xlsout_click() {
+        var goodsGrid = getDataGrid();
+        var workbook = new ExcelJS.Workbook();
+        var priceSheet = workbook.addWorksheet("商品重量列表");
+        DevExpress.excelExporter.exportDataGrid({
+            worksheet: priceSheet,
+            component: goodsGrid,
+            autoFilterEnabled: true
+        }).then(function () {
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                saveAs(new Blob([buffer], { type: "application/octet-stream" }), "商品重量表.xlsx");
+            });
+        });
+    }
+
+    function getFileUploaderInstance() {
+        return $("#file-uploader").dxFileUploader("instance");
+    }
+
+    function xlsin_click(data) {
+        var uploadControl = getFileUploaderInstance();
+        uploadControl._isCustomClickEvent = true;
+        uploadControl._$fileInput.click();
+    }
+
+    function startUpload() {
+        getLoadPanelInstance().show();
+    }
+
+    function upLoaded(e) {
+        DevExpress.ui.notify(entityToString(e.request.statusText), "success", 8000);
+        resetUpload();
+        refreshButton_click();
+    }
+
+    function uploadErr(e) {
+        DevExpress.ui.notify(entityToString(e.request.statusText), "error", 8000);
+        resetUpload();
+    }
+
+    function resetUpload() {
+        var uploadControl = getFileUploaderInstance();
+        uploadControl.reset();
+        getLoadPanelInstance().hide();
+    }
+
+    $(function () {
+        var toolitems = $("#toolbar").dxToolbar("instance").option('items');
+        if (toolitems[0].options.disabled == 0) {
+            refreshButton_click();
+        }
+    });
+
+</script>

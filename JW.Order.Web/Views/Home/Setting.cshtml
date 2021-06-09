@@ -44,8 +44,11 @@
             editing.StartEditAction(GridStartEditAction.Click);
         })
         .ColumnAutoWidth(true)
+        .ShowRowLines(true)
+        .RowAlternationEnabled(true)
         .Columns(columns => {
             columns.Add().DataField("SettingID").Visible(false).AllowEditing(false);
+            columns.Add().DataField("SettingGroup").Caption("组").AllowEditing(false);
             columns.Add().DataField("SettingName").Caption("名称").AllowEditing(false);
             columns.Add().DataField("SettingValue").Caption("值");
             columns.Add().DataField("SettingRemark").Caption("说明").AllowEditing(false);

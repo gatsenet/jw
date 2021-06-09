@@ -90,5 +90,13 @@ namespace JW.DB
         {
             get { return GetSettingValue("Stock_TimeUpdate_Enable").ExObjBool(); }
         }
+
+        /// <summary>
+        /// 商品重量导入字段
+        /// </summary>
+        public static string ImportXls_GoodsWeight
+        {
+            get { return GetSettingValue("ImportXls_GoodsWeight").ExObjString(); }
+        }
     }
 }

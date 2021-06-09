@@ -128,7 +128,9 @@
     })
     .ID("targetDataGrid")
     .Paging(p => p.PageSize(20))
-    .ColumnAutoWidth(true)    
+    .ColumnAutoWidth(true)
+    .ShowRowLines(true)
+    .RowAlternationEnabled(true)
     .SearchPanel(searchPanel => searchPanel
         .Visible(true)
         .Width(240)

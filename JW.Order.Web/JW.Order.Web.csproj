@@ -250,6 +250,8 @@
     <Content Include="Views\Supply\Index.cshtml" />
     <Content Include="Views\Home\Setting.cshtml" />
     <Content Include="Views\Home\SysLog.cshtml" />
+    <Content Include="Views\Goods\Weight.cshtml" />
+    <Content Include="Views\Goods\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -330,6 +332,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CustomerController.cs" />
+    <Compile Include="Controllers\GoodsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SampleDataController.cs" />
     <Compile Include="API\TestController.cs" />
@@ -355,6 +358,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Views\Stock\" />
     <Folder Include="Views\Test\" />
   </ItemGroup>
   <PropertyGroup>

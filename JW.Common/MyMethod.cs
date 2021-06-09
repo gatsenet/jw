@@ -7,6 +7,7 @@ using JW.Common;
 using System.Net;
 using System.IO;
 using System.Data;
+using System.Linq;
 
 namespace JW.Common
 {
@@ -345,6 +346,23 @@ namespace JW.Common
             }
             long beginTicks = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
             DateTime dateValue = new DateTime(beginTicks + dateNumber * 10000);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="fileExtensions">例如.xls,.xlsx</param>
+        public static void CheckFileExtensionValid(string fileName,string fileExtensions= ".xls,.xlsx")
+        {
+            fileName = fileName.ToLower();
+            string[] imageExtensions = fileExtensions.ToLower().Split(new char[] { ',' });
+
+            var isValidExtenstion = fileExtensions.Any(ext => {
+                return fileName.LastIndexOf(ext) > -1;
+            });
+            if (!isValidExtenstion)
+                throw new Exception("非指定的导入文件格式");
         }
     }
 }

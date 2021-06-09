@@ -61,6 +61,8 @@
              col.Add().DataField("RoleName").Caption("名称");
              col.Add().DataField("UserCount").Caption("在用用户数");
          })
+        .ShowRowLines(true)
+        .RowAlternationEnabled(true)
         .Selection(s => s.Mode(SelectionMode.Single))
         .ID("targetDataGrid")
         .Paging(p => p.PageSize(10))

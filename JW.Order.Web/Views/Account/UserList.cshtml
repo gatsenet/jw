@@ -83,6 +83,8 @@
         .ID("targetDataGrid")
         .Paging(p => p.PageSize(10))
         .ColumnAutoWidth(true)
+        .ShowRowLines(true)
+        .RowAlternationEnabled(true)
         .Editing(e => e.Mode(GridEditMode.Popup)
             .AllowUpdating(Model.InSave)
             //.AllowAdding(true)
